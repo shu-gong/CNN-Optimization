@@ -11,6 +11,16 @@ void naiveIterativeMatmul(float* const A,
     const int N,
     const int K);
 
+
+
+void iterativeMatmulRegisterSum(
+    float* const A,
+    float* const B,
+    float* const C,
+    const int M,
+    const int N,
+    const int K);
+
 void main()
 {
     int M = 1024;
@@ -26,7 +36,8 @@ void main()
     auto start = std::chrono::high_resolution_clock::now();
 
 
-    naiveIterativeMatmul(A, B, C, M, N, K);
+    //naiveIterativeMatmul(A, B, C, M, N, K);
+    iterativeMatmulRegisterSum(A, B, C, M, N, K);
 
     auto stop = std::chrono::high_resolution_clock::now();
 
@@ -53,6 +64,29 @@ void naiveIterativeMatmul(
             {
                 C[m * M + n] += A[m * M + k] * B[k * K + n];
             }
+        }
+    }
+}
+
+void iterativeMatmulRegisterSum(
+    float* const A,
+    float* const B,
+    float* const C,
+    const int M,
+    const int N,
+    const int K)
+{
+
+    for (int m = 0; m < M; m++)
+    {
+        for (int n = 0; n < N; n++)
+        {
+            float sum = 0.0f;
+            for (int k = 0; k < K; k++)
+            {
+                sum += A[m * M + k] * B[k * K + n];
+            }
+            C[m * M + n] = sum;
         }
     }
 }
