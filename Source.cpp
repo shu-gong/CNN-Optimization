@@ -26,6 +26,11 @@ void iterativeMatmulLoopReorder(
     const int N,
     const int K);
 
+void naiveIterativeMatmulTiled(
+    float* const A,
+    float* const B,
+    float* const C);
+
 void main()
 {
     int M = 1024;
@@ -42,7 +47,8 @@ void main()
 
     //naiveIterativeMatmul(A, B, C, M, N, K);
     //iterativeMatmulRegisterSum(A, B, C, M, N, K);
-    iterativeMatmulLoopReorder(A, B, C, M, N, K);
+    //iterativeMatmulLoopReorder(A, B, C, M, N, K);
+    naiveIterativeMatmulTiled(A, B, C);
 
     auto stop = std::chrono::high_resolution_clock::now();
 
@@ -59,7 +65,6 @@ void naiveIterativeMatmul(
     const int N,
     const int K)
 {
-
     for (int m = 0; m < M; m++)
     {
         for (int n = 0; n < N; n++)
@@ -67,6 +72,39 @@ void naiveIterativeMatmul(
             for (int k = 0; k < K; k++)
             {
                 C[m * M + n] += A[m * M + k] * B[k * K + n];
+            }
+        }
+    }
+}
+
+void naiveIterativeMatmulTiled(
+    float* const A,
+    float* const B,
+    float* const C)
+{
+    int Ni = 1024;
+    int Nj = 1024;
+    int Nk = 1024;
+
+    int Ti = 10;
+    int Tj = 10;
+    int Tk = 10;
+    for (int it = 0; it < Ni; it += Ti)
+    {
+        for (int jt = 0; jt < Nj; jt += Tj)
+        {
+            for (int kt = 0; kt < Nk; kt += Tk)
+            {
+                for (int i = 0; i < Ti; i++)
+                {
+                    for (int j = 0; j < Tj; j++)
+                    {
+                        for (int k = 0; k < Tk; k++)
+                        {
+                            C[i * Ni + j] += A[i * Ni + k] * B[k * Nk + j];
+                        }
+                    }
+                }
             }
         }
     }
@@ -80,7 +118,6 @@ void iterativeMatmulRegisterSum(
     const int N,
     const int K)
 {
-
     for (int m = 0; m < M; m++)
     {
         for (int n = 0; n < N; n++)
@@ -103,7 +140,6 @@ void iterativeMatmulLoopReorder(
     const int N,
     const int K)
 {
-
     for (int m = 0; m < M; m++)
     {
         for (int k = 0; k < K; k++)
@@ -115,3 +151,4 @@ void iterativeMatmulLoopReorder(
         }
     }
 }
+
