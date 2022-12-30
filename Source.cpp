@@ -2,7 +2,6 @@
 #include <string.h>
 #include <chrono>
 
-
 using namespace std;
 void naiveIterativeMatmul(float* const A,
     float* const B,
@@ -11,9 +10,15 @@ void naiveIterativeMatmul(float* const A,
     const int N,
     const int K);
 
-
-
 void iterativeMatmulRegisterSum(
+    float* const A,
+    float* const B,
+    float* const C,
+    const int M,
+    const int N,
+    const int K);
+
+void iterativeMatmulLoopReorder(
     float* const A,
     float* const B,
     float* const C,
@@ -35,16 +40,15 @@ void main()
 
     auto start = std::chrono::high_resolution_clock::now();
 
-
     //naiveIterativeMatmul(A, B, C, M, N, K);
-    iterativeMatmulRegisterSum(A, B, C, M, N, K);
+    //iterativeMatmulRegisterSum(A, B, C, M, N, K);
+    iterativeMatmulLoopReorder(A, B, C, M, N, K);
 
     auto stop = std::chrono::high_resolution_clock::now();
 
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
     std::cout << "Elapsed time: " << elapsed.count() << " ms" << std::endl;
-
 }
 
 void naiveIterativeMatmul(
@@ -87,6 +91,27 @@ void iterativeMatmulRegisterSum(
                 sum += A[m * M + k] * B[k * K + n];
             }
             C[m * M + n] = sum;
+        }
+    }
+}
+
+void iterativeMatmulLoopReorder(
+    float* const A,
+    float* const B,
+    float* const C,
+    const int M,
+    const int N,
+    const int K)
+{
+
+    for (int m = 0; m < M; m++)
+    {
+        for (int k = 0; k < K; k++)
+        {
+            for (int n = 0; n < N; n++)
+            {
+                C[m * M + n] += A[m * M + k] * B[k * K + n];
+            }
         }
     }
 }
